@@ -5,7 +5,9 @@ import com.amazon.ata.trees.model.Name;
 import com.amazon.ata.trees.model.SortBy;
 import com.amazon.ata.trees.model.SortOrder;
 
+import java.util.Comparator;
 import java.util.SortedMap;
+import java.util.TreeMap;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -23,8 +25,8 @@ public class ContactDao {
 
     @Inject
     public ContactDao() {
-        this.contactsSortedByFirstName = null;
-        this.contactsSortedByLastName = null;
+        this.contactsSortedByFirstName = new TreeMap<>(Comparator.comparing(Name::getFirstName)); //null;
+        this.contactsSortedByLastName = new TreeMap<>(Comparator.comparing(Name::getLastName)); //null;
     }
 
     /**
@@ -33,6 +35,8 @@ public class ContactDao {
      * @return The added contact.
      */
     public Contact addContact(Contact contact) {
+        // put a key value pair into contactsSortedByFirstName (contact.getName(), contact)
+        // put a key value pair into contactsSortedByLastName (contact.getName(), contact)
         this.contactsSortedByFirstName.put(contact.getName(), contact);
         this.contactsSortedByLastName.put(contact.getName(), contact);
         return contact;
@@ -47,7 +51,22 @@ public class ContactDao {
      */
     public SortedMap<Name, Contact> getContacts(SortBy sortBy, SortOrder sortOrder) {
         // TODO implement
-        return null;
+        SortedMap<Name, Contact> baseMap = null;
+        // sort by? first name or last name? (enums)
+        if (sortBy == SortBy.FIRST_NAME) {
+            baseMap = contactsSortedByFirstName;
+        } else {
+            baseMap = contactsSortedByLastName;
+        }
+
+        // sort order? ascending or descending? (Also enums)
+        if (sortOrder == SortOrder.DESCENDING) {
+            return new TreeMap<>(baseMap).descendingMap();
+        } else {
+            return new TreeMap<>(baseMap);
+        }
+
+        //return null;
     }
 
     /**
@@ -70,7 +89,8 @@ public class ContactDao {
      */
     public SortedMap<Name, Contact> getContactsStartingAt(Name startKey, SortBy sortBy, SortOrder sortOrder) {
         // TODO implement
-        return null;
+        return getContacts(sortBy, sortOrder).tailMap(startKey);
+        //return null;
     }
 
 }
